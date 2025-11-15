@@ -1,24 +1,83 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8"/>
-    <script>
-        console.log("test")
-        document.getElementById("openOptions").addEventListener("click", () => {
-            console.log("test");
-            if (browser.runtime.openOptionsPage)
-                browser.runtime.openOptionsPage();
-            else
-                window.open(chrome.runtime.getURL("options.html"));
-        });
-    </script>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 300px;
+            padding: 15px;
+            font-family: Arial, sans-serif;
+        }
+        h2 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .input-group {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            padding: 8px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .site-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .site-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #f5f5f5;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .remove-btn {
+            padding: 4px 8px;
+            background: #f44336;
+            font-size: 12px;
+        }
+        .remove-btn:hover {
+            background: #da190b;
+        }
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
+    </style>
 </head>
-<body style="font-family:system-ui;padding:12px;width:220px;">
-  <strong>Simple Site Blocker</strong>
-  <div style="margin-top:10px;">
-    <button id="openOptions">Open Options</button>
-  </div>
-
+<body>
+    <h2>🚫 Website Blocker</h2>
     
+    <div class="input-group">
+        <input type="text" id="siteInput" placeholder="example.com">
+        <button id="addBtn">Add</button>
+    </div>
+    
+    <ul class="site-list" id="siteList"></ul>
+    <div class="empty-state" id="emptyState">No blocked sites yet</div>
+    
+    <script src="popup.js"></script>
 </body>
 </html>

@@ -1,27 +1,41 @@
 body {
+  width: 320px;
+  height: 450px;
+  overflow: auto;
   font-family: Arial, sans-serif;
   margin: 10px;
-  width: 230px;
+  box-sizing: border-box;
 }
 
-input {
-  width: 50px;
+#timer, #status, #upcoming {
+  word-wrap: break-word; /* allow long text to wrap */
+  white-space: normal;
+}
+
+.tabs {
   margin-bottom: 10px;
 }
 
-button {
-  margin: 5px 5px 10px 0;
+.tablinks {
+  background-color: #eee;
+  border: none;
+  color: black;
+  padding: 6px 12px;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  border-radius: 4px 4px 0 0;
+  margin-right: 2px;
 }
 
-#timer {
-  font-size: 2em;
-  margin-top: 10px;
-  margin-bottom: 5px;
-  text-align: center;
+.tablinks.active {
+  background-color: #ddd;
+  font-weight: bold;
 }
 
-#status {
-  text-align: center;
-  font-style: italic;
-  color: #555;
+.tabcontent {
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-top: none;
+  border-radius: 0 4px 4px 4px;
 }

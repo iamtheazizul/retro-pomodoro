@@ -1,42 +1,48 @@
-const STORAGE_KEY = "blockedDomains";
+let blockedSites = [];
 
-// Simple domain matcher
-function extractHostname(url) {
-  try {
-    return new URL(url).hostname.toLowerCase();
-  } catch {
-    return "";
-  }
-}
+// Load blocked sites from storage
+browser.storage.local.get('blockedSites').then(result => {
+    blockedSites = result.blockedSites || [];
+    updateBlockingRules();
+});
 
-async function getBlockedDomains() {
-  const data = await browser.storage.local.get(STORAGE_KEY);
-  return data[STORAGE_KEY] || [];
-}
-
-browser.webRequest.onBeforeRequest.addListener(
-  async (details) => {
-    // Only block top-level navigation
-    if (details.type !== "main_frame") return;
-
-    const hostname = extractHostname(details.url);
-    if (!hostname) return;
-
-    const blocked = await getBlockedDomains();
-
-    // Exact domain match
-    if (blocked.includes(hostname)) {
-      console.log("Blocking:", details.url);
-      return { cancel: true };
+// Listen for storage changes
+browser.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.blockedSites) {
+        blockedSites = changes.blockedSites.newValue || [];
+        updateBlockingRules();
     }
+});
 
-    return;
-  },
-  { urls: ["<all_urls>"] },
-  ["blocking"]
-);
+function updateBlockingRules() {
+    // Remove existing listener if any
+    if (browser.webRequest.onBeforeRequest.hasListener(blockRequest)) {
+        browser.webRequest.onBeforeRequest.removeListener(blockRequest);
+    }
+    
+    // Add new listener if there are blocked sites
+    if (blockedSites.length > 0) {
+        const urlPatterns = blockedSites.map(site => `*://*.${site}/*`);
+        
+        browser.webRequest.onBeforeRequest.addListener(
+            blockRequest,
+            { urls: urlPatterns },
+            ["blocking"]
+        );
+    }
+}
 
-// Just for debug:
-browser.runtime.onInstalled.addListener(() => {
-  console.log("Site Blocker MV2 installed.");
+function blockRequest(details) {
+    // Redirect to a blocked page
+    return {
+        redirectUrl: browser.runtime.getURL("blocked.html")
+    };
+}
+
+// Message handler for popup
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'getBlockedSites') {
+        sendResponse({ sites: blockedSites });
+    }
+    return true;
 });

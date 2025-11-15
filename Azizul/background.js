@@ -6,7 +6,11 @@ if (typeof browser === "undefined") {
 let workDuration = 25 * 60; // default 25 mins
 let breakDuration = 5 * 60; // default 5 mins
 
+// If it isWorking, the user is doing work
+// If isWorking false, the user is taking a break
 let isWorking = true; 
+
+// timerRunning tells how far the timer has gone
 let timerRunning = false;
 let remainingSeconds = workDuration;
 let timerInterval = null;
@@ -102,6 +106,26 @@ function playSound() {
   audio.play();
 }
 
+function skipSession() {
+  pauseTimer(); // pause current timer
+
+  // switch mode:
+  isWorking = !isWorking;
+  
+  // reset remainingSeconds to the new session duration
+  if (isWorking) {
+    remainingSeconds = workDuration;
+  } else {
+    // For breaks, consider long break logic here if implemented
+    remainingSeconds = breakDuration;
+  }
+  
+  sendStatus();
+
+  // Optionally start automatically after skip (or leave paused, your choice)
+  startTimer();
+}
+
 // Listen for messages from popup
 browser.runtime.onMessage.addListener((message) => {
   switch (message.action) {
@@ -116,6 +140,9 @@ browser.runtime.onMessage.addListener((message) => {
       break;
     case "saveDurations":
       saveDurations(message.workDuration, message.breakDuration);
+      break;
+    case "skip":
+      skipSession();
       break;
   }
 });
