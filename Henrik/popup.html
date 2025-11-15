@@ -1,18 +1,24 @@
 <!doctype html>
 <html>
-<head><meta charset="utf-8"/><title>Site Blocker</title></head>
-<body style="font-family:system-ui,Arial;padding:12px;width:220px;">
-  <div>
-    <strong>Simple Site Blocker</strong>
-  </div>
+<head>
+    <meta charset="utf-8"/>
+    <script>
+        console.log("test")
+        document.getElementById("openOptions").addEventListener("click", () => {
+            console.log("test");
+            if (browser.runtime.openOptionsPage)
+                browser.runtime.openOptionsPage();
+            else
+                window.open(chrome.runtime.getURL("options.html"));
+        });
+    </script>
+</head>
+<body style="font-family:system-ui;padding:12px;width:220px;">
+  <strong>Simple Site Blocker</strong>
   <div style="margin-top:10px;">
     <button id="openOptions">Open Options</button>
   </div>
-  <script>
-    document.getElementById("openOptions").addEventListener("click", () => {
-      if (browser.runtime.openOptionsPage) browser.runtime.openOptionsPage();
-      else window.open("options.html");
-    });
-  </script>
+
+    
 </body>
 </html>

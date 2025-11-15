@@ -1,26 +1,23 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Simple Site Blocker",
   "version": "1.0",
   "description": "Block websites you add to the block list.",
   "permissions": [
-    "declarativeNetRequest",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>",
     "storage"
   ],
-  "optional_permissions": [
-    "declarativeNetRequestWithHostAccess",
-    "webRequest",
-    "webRequestBlocking"
-  ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_title": "Site Blocker",
+    "default_popup": "popup.html"
   },
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
-  },
-  "action": {
-    "default_title": "Site Blocker",
-    "default_popup": "popup.html"
   }
 }
