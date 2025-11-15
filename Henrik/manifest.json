@@ -1,23 +1,32 @@
 {
-  "manifest_version": 2,
-  "name": "Simple Site Blocker",
-  "version": "1.0",
-  "description": "Block websites you add to the block list.",
-  "permissions": [
-    "webRequest",
-    "webRequestBlocking",
-    "<all_urls>",
-    "storage"
-  ],
-  "background": {
-    "scripts": ["background.js"]
-  },
-  "browser_action": {
-    "default_title": "Site Blocker",
-    "default_popup": "popup.html"
-  },
-  "options_ui": {
-    "page": "options.html",
-    "open_in_tab": true
-  }
+    "manifest_version": 2,
+    "name": "Website Blocker",
+    "version": "1.0",
+    "description": "Block distracting websites to stay focused",
+    
+    "permissions": [
+        "webRequest",
+        "webRequestBlocking",
+        "storage",
+        "<all_urls>"
+    ],
+    
+    "background": {
+        "scripts": ["background.js"]
+    },
+    
+    "browser_action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "48": "icon.png"
+        }
+    },
+    
+    "icons": {
+        "48": "icon.png"
+    },
+    
+    "web_accessible_resources": [
+        "blocked.html"
+    ]
 }
