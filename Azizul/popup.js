@@ -1,3 +1,7 @@
+if (typeof browser === "undefined") {
+  var browser = chrome;
+}
+
 const workInput = document.getElementById("work-duration");
 const breakInput = document.getElementById("break-duration");
 const startBtn = document.getElementById("start");

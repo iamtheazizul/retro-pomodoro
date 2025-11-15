@@ -1,3 +1,6 @@
+if (typeof browser === "undefined") {
+  var browser = chrome;
+}
 // Background script to handle the Pomodoro timer logic
 
 let workDuration = 25 * 60; // default 25 mins
@@ -42,6 +45,7 @@ function startTimer() {
       } else {
         notify("Break is over!", "Time to get back to work.");
       }
+      playSound();
       isWorking = !isWorking;
       remainingSeconds = isWorking ? workDuration : breakDuration;
       sendStatus();
@@ -91,6 +95,11 @@ function notify(title, message) {
     "title": title,
     "message": message
   });
+}
+
+function playSound() {
+  let audio = new Audio(browser.runtime.getURL("sounds/ding.mp3"));
+  audio.play();
 }
 
 // Listen for messages from popup
