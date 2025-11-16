@@ -2,6 +2,7 @@ const siteInput = document.getElementById('siteInput');
 const addBtn = document.getElementById('addBtn');
 const siteList = document.getElementById('siteList');
 const emptyState = document.getElementById('emptyState');
+const gameOverlayBtn = document.getElementById('gameOverlayBtn');
 
 // Load and display blocked sites
 function loadSites() {
@@ -78,6 +79,13 @@ function removeSite(site) {
 addBtn.addEventListener('click', addSite);
 siteInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') addSite();
+});
+gameOverlayBtn.addEventListener('click', async () => {
+    console.log("sending message to tab");
+
+    const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+
+    browser.tabs.sendMessage(tabs[0].id, { action: "showOverlay" });
 });
 
 // Load sites on popup open

@@ -3,12 +3,24 @@ browser.runtime.sendMessage({
     action: 'checkIfBlocked',
     url: window.location.href
 }).then(response => {
+    console.log("response")
     if (response.blocked) {
-        showBlockOverlay();
+        showOverlay();
     }
 });
 
-function showBlockOverlay() {
+
+browser.runtime.onMessage.addListener((message, sender) => {
+    console.log("content script got runtime message:", message);
+
+    if (message.action === "showOverlay") {
+        showOverlay();
+    }
+});
+
+
+
+function showOverlay() {
     // Create overlay container
     const overlay = document.createElement('div');
     overlay.id = 'pong-block-overlay';
