@@ -5,57 +5,82 @@ if (typeof browser === "undefined") {
 // Elements
 const tabTimerBtn = document.getElementById("tabTimerBtn");
 const tabSettingsBtn = document.getElementById("tabSettingsBtn");
+const tabBlockedSitesBtn = document.getElementById("tabBlockedSitesBtn");
+
 const tabTimer = document.getElementById("tabTimer");
 const tabSettings = document.getElementById("tabSettings");
+const tabBlockedSites = document.getElementById("tabBlockedSites");
 
 const workInput = document.getElementById("work-duration");
 const breakInput = document.getElementById("break-duration");
 const startBtn = document.getElementById("start");
 const pauseBtn = document.getElementById("pause");
 const resetBtn = document.getElementById("reset");
+const skipBtn = document.getElementById("skip");
 const saveBtn = document.getElementById("save");
 const timerLabel = document.getElementById("timer");
-// const statusLabel = document.getElementById("status");
-const skipBtn = document.getElementById("skip");
+const upcomingLabel = document.getElementById("upcoming");
+
+const blockedSitesInput = document.getElementById("blockedSitesInput");
+const saveBlockedSitesBtn = document.getElementById("saveBlockedSitesBtn");
 
 let timerRunning = false;
+let storedWorkDuration = 25 * 60;
+let storedBreakDuration = 5 * 60;
 
-// Tab switching functions
 function switchTab(tabName) {
+  tabTimer.style.display = "none";
+  tabSettings.style.display = "none";
+  tabBlockedSites.style.display = "none";
+
+  tabTimerBtn.classList.remove("active");
+  tabSettingsBtn.classList.remove("active");
+  tabBlockedSitesBtn.classList.remove("active");
+
   if (tabName === "timer") {
     tabTimer.style.display = "block";
-    tabSettings.style.display = "none";
     tabTimerBtn.classList.add("active");
-    tabSettingsBtn.classList.remove("active");
   } else if (tabName === "settings") {
-    tabTimer.style.display = "none";
     tabSettings.style.display = "block";
-    tabTimerBtn.classList.remove("active");
     tabSettingsBtn.classList.add("active");
+  } else if (tabName === "blockedSites") {
+    tabBlockedSites.style.display = "block";
+    tabBlockedSitesBtn.classList.add("active");
   }
 }
 
-// Add tab click event listeners
-tabTimerBtn.addEventListener("click", () => switchTab("timer"));
-tabSettingsBtn.addEventListener("click", () => switchTab("settings"));
-skipBtn.addEventListener("click", () => {
-  sendMessage("skip");
-});
-
-
-// Convert seconds to MM:SS format
 function formatTime(sec) {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
-let storedWorkDuration = 25 * 60;   // fallback default in seconds
-let storedBreakDuration = 5 * 60;   // fallback default in seconds
+function updateDisplay({ remainingSeconds, isWorking, timerRunning: running }) {
+  timerLabel.textContent = formatTime(remainingSeconds);
+  timerRunning = running;
 
-const upcomingLabel = document.getElementById("upcoming");
+  workInput.disabled = running;
+  breakInput.disabled = running;
+  saveBtn.disabled = running;
 
-// Load saved durations into inputs and variables
+  if (!running) {
+    upcomingLabel.textContent = "Ready to start!";
+    upcomingLabel.style.color = "#00ff00";
+  } else if (isWorking) {
+    let breakMins = Math.floor(storedBreakDuration / 60);
+    upcomingLabel.textContent = `Next: Break (${breakMins}min)`;
+    upcomingLabel.style.color = "#00ffff";
+  } else {
+    let workMins = Math.floor(storedWorkDuration / 60);
+    upcomingLabel.textContent = `Next: Work (${workMins}min)`;
+    upcomingLabel.style.color = "#ff00ff";
+  }
+}
+
+function sendMessage(action, data = {}) {
+  return browser.runtime.sendMessage({ action, ...data }).catch(() => {});
+}
+
 function loadSavedDurations() {
   browser.storage.local.get(["workDuration", "breakDuration"]).then(result => {
     if (result.workDuration) {
@@ -69,69 +94,59 @@ function loadSavedDurations() {
   });
 }
 
-// Update UI from background
-function updateDisplay({ remainingSeconds, isWorking, timerRunning: running }) {
-  timerLabel.textContent = formatTime(remainingSeconds);
-  // statusLabel.textContent = `Status: ${isWorking ? "Working" : "Break"}`;
-  timerRunning = running;
-
-  // Disable inputs if running
-  workInput.disabled = running;
-  breakInput.disabled = running;
-  saveBtn.disabled = running;
-
-  // Update upcoming label
-  if (!running) {
-    upcomingLabel.textContent = "";
-  } else {
-    if (isWorking) {
-      // Currently working → upcoming break
-      let breakMins = Math.floor(storedBreakDuration / 60);
-      upcomingLabel.textContent = `Upcoming: Break ${breakMins} minute${breakMins !== 1 ? "s" : ""}`;
-    } else {
-      // Currently on break → upcoming work
-      let workMins = Math.floor(storedWorkDuration / 60);
-      upcomingLabel.textContent = `Upcoming: Work ${workMins} minute${workMins !== 1 ? "s" : ""}`;
-    }
-  }
-}
-// Send messages to background
-function sendMessage(action, data = {}) {
-  return browser.runtime.sendMessage({ action, ...data });
+function loadBlockedSites() {
+  browser.storage.local.get(["blockedSites"]).then(result => {
+    blockedSitesInput.value = (result.blockedSites || []).join("\n");
+  });
 }
 
-// Button event handlers
-startBtn.addEventListener("click", () => {
-  sendMessage("start");
+function saveBlockedSites() {
+  const sites = blockedSitesInput.value
+    .split("\n")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  browser.storage.local.set({ blockedSites: sites }).then(() => {
+    alert("✓ Blocked sites list saved!");
+    browser.runtime.sendMessage({ action: "blockedSitesUpdated" }).catch(() => {});
+  });
+}
+
+// Listeners
+tabTimerBtn.addEventListener("click", () => switchTab("timer"));
+tabSettingsBtn.addEventListener("click", () => switchTab("settings"));
+tabBlockedSitesBtn.addEventListener("click", () => {
+  switchTab("blockedSites");
+  loadBlockedSites();
 });
 
-pauseBtn.addEventListener("click", () => {
-  sendMessage("pause");
-});
-
-resetBtn.addEventListener("click", () => {
-  sendMessage("reset");
-});
+startBtn.addEventListener("click", () => sendMessage("start"));
+pauseBtn.addEventListener("click", () => sendMessage("pause"));
+resetBtn.addEventListener("click", () => sendMessage("reset"));
+skipBtn.addEventListener("click", () => sendMessage("skip"));
 
 saveBtn.addEventListener("click", () => {
   const work = Number(workInput.value);
   const brk = Number(breakInput.value);
   if (work < 1 || brk < 1) {
-    alert("Durations must be at least 1 minute");
+    alert("⚠ Durations must be at least 1 minute!");
     return;
   }
+  storedWorkDuration = work * 60;
+  storedBreakDuration = brk * 60;
   sendMessage("saveDurations", { workDuration: work, breakDuration: brk });
-  alert("Settings saved!");
+  alert("✓ Settings saved!");
 });
 
-// Listen for status updates from background
+saveBlockedSitesBtn.addEventListener("click", saveBlockedSites);
+
 browser.runtime.onMessage.addListener((message) => {
   if (message.action === "timerUpdate") {
     updateDisplay(message);
   }
 });
 
-// Initialize popup
+// Init
 loadSavedDurations();
-sendMessage("pause"); // Ask background to send current status
-switchTab("timer"); // default tab
+sendMessage("getStatus");
+switchTab("timer");

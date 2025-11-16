@@ -1,53 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8">
   <title>Pomodoro Timer</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Pomodoro Timer</h2>
+  <div class="container screen-border">
+    <div class="title">⏱ POMODORO ⏱</div>
 
-  <div class="tabs">
-    <button class="tablinks active" id="tabTimerBtn">Timer</button>
-    <button class="tablinks" id="tabSettingsBtn">Settings</button>
-  </div>
-
-  <!-- Timer Tab Content -->
-  <div id="tabTimer" class="tabcontent" style="display:block;">
-
-    <h3 id="timer">25:00</h3>
-
-    <!-- <h4 id="status">Status: Ready</h4> -->
-    <h4 id="upcoming">Upcoming: Ready</h4>
-
-    <div>
-      <button id="start">Start</button>
-      <button id="pause">Pause</button>
-      <button id="reset">Reset</button>
-      <button id="skip">Skip</button>  <!-- New button -->
+    <div class="tabs">
+      <button id="tabTimerBtn" class="tablinks active">TIMER</button>
+      <button id="tabSettingsBtn" class="tablinks">SETTINGS</button>
+      <button id="tabBlockedSitesBtn" class="tablinks">BLOCKED SITES</button>
     </div>
 
-  </div>
-
-  
-
-  <!-- Settings Tab Content -->
-  <div id="tabSettings" class="tabcontent" style="display:none;">
-    <div>
-      <label for="work-duration">Work (minutes): </label>
-      <input id="work-duration" type="number" min="1" value="25" />
+    <div id="tabTimer" class="tabcontent" style="display:block">
+      <div class="display-box">
+        <div id="timer" class="timer-display">25:00</div>
+      </div>
+      <div id="upcoming" class="upcoming-text">Ready to start!</div>
+      <div class="button-grid">
+        <button id="start" class="retro-btn start-btn">START</button>
+        <button id="pause" class="retro-btn pause-btn">PAUSE</button>
+        <button id="reset" class="retro-btn reset-btn">RESET</button>
+        <button id="skip" class="retro-btn skip-btn">SKIP</button>
+      </div>
     </div>
 
-    <div>
-      <label for="break-duration">Break (minutes): </label>
-      <input id="break-duration" type="number" min="1" value="5" />
+    <div id="tabSettings" class="tabcontent" style="display:none">
+      <div class="settings-group">
+        <label for="work-duration">WORK (MINUTES):</label>
+        <input id="work-duration" type="number" min="1" value="25">
+      </div>
+      <div class="settings-group">
+        <label for="break-duration">BREAK (MINUTES):</label>
+        <input id="break-duration" type="number" min="1" value="5">
+      </div>
+      <button id="save" class="retro-btn save-btn">SAVE</button>
     </div>
 
-    <button id="save">Save Settings</button>
+    <div id="tabBlockedSites" class="tabcontent" style="display:none">
+      <label for="blockedSitesInput">Enter site domains to block (one per line):</label>
+      <textarea id="blockedSitesInput" rows="10" style="width:100%;background:#000;color:#0f0;border:2px solid #0f0;border-radius:4px;font-family:monospace"></textarea>
+      <button id="saveBlockedSitesBtn" class="retro-btn save-btn">Save Blocked Sites</button>
+    </div>
   </div>
 
-
-  <script src="popup.js"></script>
+  <script src="popup.js" defer></script>
 </body>
 </html>
