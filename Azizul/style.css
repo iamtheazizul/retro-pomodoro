@@ -285,26 +285,91 @@ body {
   letter-spacing: 2px;
 }
 
-.settings-group input {
+.settings-group input[type="range"] {
   width: 100%;
-  font-family: 'VT323', monospace;
-  font-size: 24px;
-  padding: 10px;
+  height: 8px;
   background: #000;
   border: 2px solid #00ff00;
-  color: #00ff00;
   border-radius: 4px;
-  text-shadow: 0 0 5px #00ff00;
-}
-
-.settings-group input:focus {
   outline: none;
-  box-shadow: 0 0 15px #00ff00;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-.settings-group input:disabled {
+.settings-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: #00ff00;
+  border: 2px solid #00ff00;
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ff00;
+}
+
+.settings-group input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  background: #00ff00;
+  border: 2px solid #00ff00;
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ff00;
+}
+
+.settings-group input[type="range"]:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.settings-group input[type="range"]:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+}
+
+.settings-group input[type="range"]:disabled::-moz-range-thumb {
+  cursor: not-allowed;
+}
+
+.total-time {
+  text-align: center;
+  font-size: 20px;
+  color: #00ffff;
+  margin: 20px 0 10px 0;
+  padding: 10px;
+  background: rgba(0, 255, 255, 0.1);
+  border: 2px solid #00ffff;
+  border-radius: 4px;
+  text-shadow: 0 0 10px #00ffff;
+}
+
+.cycle-info {
+  text-align: center;
+  font-size: 20px;
+  color: #ffff00;
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px #ffff00;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.slider-message {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #00ffff;
+  text-align: center;
+  font-style: italic;
+  text-shadow: 0 0 8px #00ffff;
+  min-height: 24px;
+  animation: messageGlow 2s ease-in-out infinite;
+}
+
+@keyframes messageGlow {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
 }
 
 .save-btn {

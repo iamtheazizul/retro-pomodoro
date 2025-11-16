@@ -4,15 +4,18 @@ if (typeof browser === "undefined") {
 
 let workDuration = 25 * 60;
 let breakDuration = 5 * 60;
+let cycles = 1;
+let currentCycle = 0;
 let isWorking = true;
 let timerRunning = false;
 let remainingSeconds = workDuration;
 let timerInterval = null;
 
 // Load saved preferences on start
-browser.storage.local.get(["workDuration", "breakDuration"]).then((result) => {
+browser.storage.local.get(["workDuration", "breakDuration", "cycles"]).then((result) => {
   if (result.workDuration) workDuration = result.workDuration;
   if (result.breakDuration) breakDuration = result.breakDuration;
+  if (result.cycles) cycles = result.cycles;
   remainingSeconds = isWorking ? workDuration : breakDuration;
 });
 
@@ -21,7 +24,9 @@ function sendStatus() {
     action: "timerUpdate",
     remainingSeconds,
     isWorking,
-    timerRunning
+    timerRunning,
+    currentCycle,
+    totalCycles: cycles
   }).catch(() => {
     // Popup might be closed, ignore error
   });
@@ -29,6 +34,14 @@ function sendStatus() {
 
 function startTimer() {
   if (timerRunning) return;
+  
+  // If starting fresh (currentCycle is 0), set to cycle 1
+  if (currentCycle === 0) {
+    currentCycle = 1;
+    isWorking = true;
+    remainingSeconds = workDuration;
+  }
+  
   timerRunning = true;
   sendStatus();
 
@@ -37,15 +50,38 @@ function startTimer() {
       remainingSeconds--;
       sendStatus();
     } else {
+      // Session complete
       if (isWorking) {
         notify("Work session complete!", "Time for a break.");
+        playSound();
+        
+        // Switch to break
+        isWorking = false;
+        remainingSeconds = breakDuration;
+        sendStatus();
       } else {
+        // Break complete
         notify("Break is over!", "Time to get back to work.");
+        playSound();
+        
+        // Check if we've completed all cycles
+        if (currentCycle >= cycles) {
+          // All cycles complete - stop timer
+          notify("All cycles complete!", "Great job! Timer has stopped.");
+          pauseTimer();
+          currentCycle = 0;
+          isWorking = true;
+          remainingSeconds = workDuration;
+          sendStatus();
+          return;
+        }
+        
+        // Move to next cycle
+        currentCycle++;
+        isWorking = true;
+        remainingSeconds = workDuration;
+        sendStatus();
       }
-      playSound();
-      isWorking = !isWorking;
-      remainingSeconds = isWorking ? workDuration : breakDuration;
-      sendStatus();
     }
   }, 1000);
 }
@@ -61,18 +97,21 @@ function pauseTimer() {
 
 function resetTimer() {
   pauseTimer();
+  currentCycle = 0;
   isWorking = true;
   remainingSeconds = workDuration;
   sendStatus();
 }
 
-function saveDurations(workMin, breakMin) {
+function saveDurations(workMin, breakMin, cycleCount) {
   workDuration = workMin * 60;
   breakDuration = breakMin * 60;
+  cycles = cycleCount;
 
   browser.storage.local.set({
     workDuration,
-    breakDuration
+    breakDuration,
+    cycles
   });
 
   // Only reset if timer is not running
@@ -97,11 +136,28 @@ function playSound() {
 }
 
 function skipSession() {
-  pauseTimer();
-  isWorking = !isWorking;
-  remainingSeconds = isWorking ? workDuration : breakDuration;
-  sendStatus();
-  startTimer();
+  if (!isWorking) {
+    // Can only skip during break time
+    pauseTimer();
+    
+    // Check if we've completed all cycles
+    if (currentCycle >= cycles) {
+      // All cycles complete
+      notify("All cycles complete!", "Great job! Timer has stopped.");
+      currentCycle = 0;
+      isWorking = true;
+      remainingSeconds = workDuration;
+      sendStatus();
+      return;
+    }
+    
+    // Move to next cycle
+    currentCycle++;
+    isWorking = true;
+    remainingSeconds = workDuration;
+    sendStatus();
+    startTimer();
+  }
 }
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -116,7 +172,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       resetTimer();
       break;
     case "saveDurations":
-      saveDurations(message.workDuration, message.breakDuration);
+      saveDurations(message.workDuration, message.breakDuration, message.cycles);
       break;
     case "skip":
       skipSession();

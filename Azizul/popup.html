@@ -21,22 +21,32 @@
         <div id="timer" class="timer-display">25:00</div>
       </div>
       <div id="upcoming" class="upcoming-text">Ready to start!</div>
+      <div id="cycleInfo" class="cycle-info">Cycle 0/1</div>
       <div class="button-grid">
         <button id="start" class="retro-btn start-btn">START</button>
         <button id="pause" class="retro-btn pause-btn">PAUSE</button>
         <button id="reset" class="retro-btn reset-btn">RESET</button>
-        <button id="skip" class="retro-btn skip-btn">SKIP</button>
+        <button id="skip" class="retro-btn skip-btn hidden">SKIP</button>
       </div>
     </div>
 
     <div id="tabSettings" class="tabcontent" style="display:none">
       <div class="settings-group">
-        <label for="work-duration">WORK (MINUTES):</label>
-        <input id="work-duration" type="number" min="1" value="25">
+        <label for="work-duration">WORK TIME: <span id="work-value">25</span> MIN</label>
+        <input id="work-duration" type="range" min="5" max="60" step="5" value="25">
+        <div id="work-message" class="slider-message">Let's get things done! 💪</div>
       </div>
       <div class="settings-group">
-        <label for="break-duration">BREAK (MINUTES):</label>
-        <input id="break-duration" type="number" min="1" value="5">
+        <label for="break-duration">BREAK TIME: <span id="break-value">5</span> MIN</label>
+        <input id="break-duration" type="range" min="5" max="30" step="5" value="5">
+        <div id="break-message" class="slider-message">Quick recharge! ⚡</div>
+      </div>
+      <div class="settings-group">
+        <label for="cycle-count">CYCLES: <span id="cycle-value">1</span></label>
+        <input id="cycle-count" type="range" min="1" max="10" step="1" value="1">
+      </div>
+      <div class="total-time">
+        Total Time: <span id="total-time-display">30 min</span>
       </div>
       <button id="save" class="retro-btn save-btn">SAVE</button>
     </div>
