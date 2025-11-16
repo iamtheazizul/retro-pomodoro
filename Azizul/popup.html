@@ -1,63 +1,103 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>BreakTime</title>
+  <meta charset="UTF-8">
   <link rel="stylesheet" href="style.css">
+  <title>BreakTime</title>
 </head>
 <body>
-  <div class="container screen-border">
-    <div id="modeIndicator" class="mode-indicator">READY</div>
-    <div class="title">BreakTime</div>
+  <div class="container">
+    <div class="mode-indicator mode-ready" id="modeIndicator">READY</div>
 
-    <div class="tabs">
-      <button id="tabTimerBtn" class="tablinks active">TIMER</button>
-      <button id="tabSettingsBtn" class="tablinks">SETTINGS</button>
-      <button id="tabBlockedSitesBtn" class="tablinks">BLOCKED SITES</button>
-    </div>
+    <div class="screen-border">
+      <h1 class="title">BreakTime</h1>
 
-    <div id="tabTimer" class="tabcontent" style="display:block">
-      <div class="display-box">
-        <div id="timer" class="timer-display">25:00</div>
+      <div class="tabs">
+        <button class="tablinks" id="tabTimerBtn">TIMER</button>
+        <button class="tablinks" id="tabSettingsBtn">SETTINGS</button>
+        <button class="tablinks" id="tabBlockedSitesBtn">BLOCKED SITES</button>
       </div>
-      <div id="upcoming" class="upcoming-text">Ready to start!</div>
-      <div id="cycleInfo" class="cycle-info">Cycle 0/1</div>
-      <div class="button-grid">
-        <button id="start" class="retro-btn start-btn">START</button>
-        <button id="pause" class="retro-btn pause-btn">PAUSE</button>
-        <button id="reset" class="retro-btn reset-btn">RESET</button>
-        <button id="skip" class="retro-btn skip-btn hidden">SKIP</button>
-      </div>
-    </div>
 
-    <div id="tabSettings" class="tabcontent" style="display:none">
-      <div class="settings-group">
-        <label for="work-duration">WORK TIME: <span id="work-value">25</span> MIN</label>
-        <input id="work-duration" type="range" min="5" max="60" step="5" value="25">
-        <div id="work-message" class="slider-message">Let's get things done! 💪</div>
-      </div>
-      <div class="settings-group">
-        <label for="break-duration">BREAK TIME: <span id="break-value">5</span> MIN</label>
-        <input id="break-duration" type="range" min="5" max="30" step="5" value="5">
-        <div id="break-message" class="slider-message">Quick recharge! ⚡</div>
-      </div>
-      <div class="settings-group">
-        <label for="cycle-count">CYCLES: <span id="cycle-value">1</span></label>
-        <input id="cycle-count" type="range" min="1" max="10" step="1" value="1">
-      </div>
-      <div class="total-time">
-        Total Time: <span id="total-time-display">30 min</span>
-      </div>
-      <button id="save" class="retro-btn save-btn">SAVE</button>
-    </div>
+      <div id="tabTimer" class="tabcontent">
+        <div class="display-box">
+          <div class="timer-display" id="timer">25:00</div>
+        </div>
 
-    <div id="tabBlockedSites" class="tabcontent" style="display:none">
-      <label for="blockedSitesInput">Enter site domains to block (one per line):</label>
-      <textarea id="blockedSitesInput" rows="10" style="width:100%;background:#000;color:#0f0;border:2px solid #0f0;border-radius:4px;font-family:monospace"></textarea>
-      <button id="saveBlockedSitesBtn" class="retro-btn save-btn">Save Blocked Sites</button>
+        <div class="upcoming-text" id="upcoming">Ready to start!</div>
+        <div class="cycle-info" id="cycleInfo">Cycle 0/1</div>
+
+        <div class="button-grid">
+          <button class="retro-btn start-btn" id="start">START</button>
+          <button class="retro-btn pause-btn" id="pause">PAUSE</button>
+          <button class="retro-btn reset-btn" id="reset">RESET</button>
+          <button class="retro-btn skip-btn hidden" id="skip">SKIP</button>
+        </div>
+
+        <!-- Add Mute Button -->
+        <button class="retro-btn mute-btn hidden" id="muteBtn" style="margin-top: 10px; width: 100%;">
+          🔊 MUTE MUSIC
+        </button>
+      </div>
+
+      <div id="tabSettings" class="tabcontent" style="display:none;">
+        <div class="settings-group">
+          <label>WORK TIME: <span id="work-value">25</span> MIN</label>
+          <input type="range" id="work-duration" min="5" max="60" step="5" value="25">
+          <div class="slider-message" id="work-message">Let's get things done! 💪</div>
+        </div>
+
+        <div class="settings-group">
+          <label>BREAK TIME: <span id="break-value">5</span> MIN</label>
+          <input type="range" id="break-duration" min="5" max="30" step="5" value="5">
+          <div class="slider-message" id="break-message">Quick recharge! ⚡</div>
+        </div>
+
+        <div class="settings-group">
+          <label>CYCLES: <span id="cycle-value">1</span></label>
+          <input type="range" id="cycle-count" min="1" max="8" step="1" value="1">
+        </div>
+
+        <div class="total-time" id="total-time-display">Total Time: 30 min</div>
+
+        <!-- Add Background Music Selection -->
+        <div class="settings-group">
+          <label>BACKGROUND MUSIC</label>
+          <div class="music-options">
+            <button class="music-option" data-music="none">
+              <span class="music-icon">✖️</span>
+              <span>None</span>
+            </button>
+            <button class="music-option" data-music="focus1">
+              <span class="music-icon">🎵</span>
+              <span>Focus 1</span>
+            </button>
+            <button class="music-option" data-music="focus2">
+              <span class="music-icon">🎵</span>
+              <span>Focus 2</span>
+            </button>
+            <button class="music-option" data-music="focus3">
+              <span class="music-icon">🎵</span>
+              <span>Focus 3</span>
+            </button>
+            <button class="music-option" data-music="focus4">
+              <span class="music-icon">🎵</span>
+              <span>Focus 4</span>
+            </button>
+          </div>
+          <div class="slider-message" id="music-message">No music selected</div>
+        </div>
+
+        <button class="retro-btn save-btn" id="save">SAVE</button>
+      </div>
+
+      <div id="tabBlockedSites" class="tabcontent" style="display:none;">
+        <p>Enter site domains to block (one per line):</p>
+        <textarea id="blockedSitesInput" rows="10" style="width:100%; font-family: 'VT323', monospace; font-size: 18px; background: #000; color: #00ff00; border: 2px solid #00ff00; padding: 10px; margin: 10px 0;"></textarea>
+        <button class="retro-btn save-btn" id="saveBlockedSitesBtn">Save Blocked Sites</button>
+      </div>
     </div>
   </div>
 
-  <script src="popup.js" defer></script>
+  <script src="popup.js"></script>
 </body>
 </html>

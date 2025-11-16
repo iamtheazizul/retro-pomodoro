@@ -27,5 +27,12 @@
       "js": ["content.js", "content_script.js"],
       "run_at": "document_idle"
     }
+  ],
+  "web_accessible_resources": [
+    "sounds/ding.mp3",
+    "music/focus1.mp3",
+    "music/focus2.mp3",
+    "music/focus3.mp3",
+    "music/focus4.mp3"
   ]
 }

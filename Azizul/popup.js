@@ -20,12 +20,14 @@ const cycleValue = document.getElementById("cycle-value");
 const totalTimeDisplay = document.getElementById("total-time-display");
 const workMessage = document.getElementById("work-message");
 const breakMessage = document.getElementById("break-message");
+const musicMessage = document.getElementById("music-message");  // Add this line
 
 const startBtn = document.getElementById("start");
 const pauseBtn = document.getElementById("pause");
 const resetBtn = document.getElementById("reset");
 const skipBtn = document.getElementById("skip");
 const saveBtn = document.getElementById("save");
+const muteBtn = document.getElementById("muteBtn");  // Add this line
 const timerLabel = document.getElementById("timer");
 const upcomingLabel = document.getElementById("upcoming");
 const cycleInfo = document.getElementById("cycleInfo");
@@ -34,12 +36,17 @@ const modeIndicator = document.getElementById("modeIndicator");
 const blockedSitesInput = document.getElementById("blockedSitesInput");
 const saveBlockedSitesBtn = document.getElementById("saveBlockedSitesBtn");
 
+const musicOptions = document.querySelectorAll(".music-option");  // Add this line
+
 let timerRunning = false;
 let storedWorkDuration = 25 * 60;
 let storedBreakDuration = 5 * 60;
 let storedCycles = 1;
 let currentCycle = 0;
 let totalCycles = 1;
+
+let selectedMusic = "none";
+let isMuted = false;
 
 function switchTab(tabName) {
   tabTimer.style.display = "none";
@@ -138,34 +145,34 @@ function updateDisplay({ remainingSeconds, isWorking, timerRunning: running, cur
   cycleInput.disabled = running;
   saveBtn.disabled = running;
 
-  // Update cycle info
   cycleInfo.textContent = `Cycle ${currentCycle}/${totalCycles}`;
 
-  // Show/hide skip button (only during break time)
-  // if (running && !isWorking) {
-  //   skipBtn.classList.remove("hidden");
-  // } else {
-  //   skipBtn.classList.add("hidden");
-  // }
-
-    // Show/hide skip button (during both work and break time)
+  // Show/hide skip button (during both work and break time)
   if (running) {
     skipBtn.classList.remove("hidden");
   } else {
     skipBtn.classList.add("hidden");
   }
+
+  // Show/hide mute button (only when music is selected and timer is running)
+  if (running && selectedMusic !== "none") {
+    muteBtn.classList.remove("hidden");
+  } else {
+    muteBtn.classList.add("hidden");
+  }
+
   // Update mode indicator
   if (!running) {
     modeIndicator.textContent = "READY";
     modeIndicator.className = "mode-indicator mode-ready";
     upcomingLabel.textContent = "Ready to start!";
-    upcomingLabel.style.color = "#007000ff";
+    upcomingLabel.style.color = "#00ff00";
   } else if (isWorking) {
     modeIndicator.textContent = "WORK";
     modeIndicator.className = "mode-indicator mode-work";
     let breakMins = Math.floor(storedBreakDuration / 60);
     upcomingLabel.textContent = `Next: Break (${breakMins}min)`;
-    upcomingLabel.style.color = "#02dcdcff";
+    upcomingLabel.style.color = "#00ffff";
   } else {
     modeIndicator.textContent = "BREAK";
     modeIndicator.className = "mode-indicator mode-break";
@@ -175,12 +182,60 @@ function updateDisplay({ remainingSeconds, isWorking, timerRunning: running, cur
   }
 }
 
+// function updateDisplay({ remainingSeconds, isWorking, timerRunning: running, currentCycle: cycle, totalCycles: total }) {
+//   timerLabel.textContent = formatTime(remainingSeconds);
+//   timerRunning = running;
+//   currentCycle = cycle || 0;
+//   totalCycles = total || storedCycles;
+
+//   workInput.disabled = running;
+//   breakInput.disabled = running;
+//   cycleInput.disabled = running;
+//   saveBtn.disabled = running;
+
+//   // Update cycle info
+//   cycleInfo.textContent = `Cycle ${currentCycle}/${totalCycles}`;
+
+//   // Show/hide skip button (only during break time)
+//   // if (running && !isWorking) {
+//   //   skipBtn.classList.remove("hidden");
+//   // } else {
+//   //   skipBtn.classList.add("hidden");
+//   // }
+
+//     // Show/hide skip button (during both work and break time)
+//   if (running) {
+//     skipBtn.classList.remove("hidden");
+//   } else {
+//     skipBtn.classList.add("hidden");
+//   }
+//   // Update mode indicator
+//   if (!running) {
+//     modeIndicator.textContent = "READY";
+//     modeIndicator.className = "mode-indicator mode-ready";
+//     upcomingLabel.textContent = "Ready to start!";
+//     upcomingLabel.style.color = "#007000ff";
+//   } else if (isWorking) {
+//     modeIndicator.textContent = "WORK";
+//     modeIndicator.className = "mode-indicator mode-work";
+//     let breakMins = Math.floor(storedBreakDuration / 60);
+//     upcomingLabel.textContent = `Next: Break (${breakMins}min)`;
+//     upcomingLabel.style.color = "#02dcdcff";
+//   } else {
+//     modeIndicator.textContent = "BREAK";
+//     modeIndicator.className = "mode-indicator mode-break";
+//     let workMins = Math.floor(storedWorkDuration / 60);
+//     upcomingLabel.textContent = `Next: Work (${workMins}min)`;
+//     upcomingLabel.style.color = "#ff00ff";
+//   }
+// }
+
 function sendMessage(action, data = {}) {
   return browser.runtime.sendMessage({ action, ...data }).catch(() => {});
 }
 
 function loadSavedDurations() {
-  browser.storage.local.get(["workDuration", "breakDuration", "cycles"]).then(result => {
+  browser.storage.local.get(["workDuration", "breakDuration", "cycles", "selectedMusic"]).then(result => {
     if (result.workDuration) {
       const workMins = Math.floor(result.workDuration / 60);
       workInput.value = workMins;
@@ -199,6 +254,16 @@ function loadSavedDurations() {
       cycleInput.value = result.cycles;
       cycleValue.textContent = result.cycles;
       storedCycles = result.cycles;
+    }
+    if (result.selectedMusic) {
+      selectedMusic = result.selectedMusic;
+      updateMusicMessage(selectedMusic);
+      // Update UI to show selected music
+      musicOptions.forEach(option => {
+        if (option.dataset.music === selectedMusic) {
+          option.classList.add("selected");
+        }
+      });
     }
     calculateTotalTime();
   });
@@ -220,6 +285,18 @@ function saveBlockedSites() {
     alert("✓ Blocked sites list saved!");
     browser.runtime.sendMessage({ action: "blockedSitesUpdated" }).catch(() => {});
   });
+}
+
+function updateMusicMessage(music) {
+  const messages = {
+    none: "No music selected",
+    focus1: "Focus Music 1 selected 🎵",
+    focus2: "Focus Music 2 selected 🎵",
+    focus3: "Focus Music 3 selected 🎵",
+    focus4: "Focus Music 4 selected 🎵"
+  };
+  
+  musicMessage.textContent = messages[music] || "No music selected";
 }
 
 // Listeners
@@ -289,6 +366,40 @@ browser.runtime.onMessage.addListener((message) => {
   if (message.action === "timerUpdate") {
     updateDisplay(message);
   }
+});
+
+// Music selection listeners
+musicOptions.forEach(option => {
+  option.addEventListener("click", () => {
+    selectedMusic = option.dataset.music;
+    
+    // Update UI
+    musicOptions.forEach(opt => opt.classList.remove("selected"));
+    option.classList.add("selected");
+    
+    updateMusicMessage(selectedMusic);
+    
+    // Save to storage
+    browser.storage.local.set({ selectedMusic });
+    
+    // Notify background script
+    sendMessage("musicChanged", { music: selectedMusic });
+  });
+});
+
+// Mute button listener
+muteBtn.addEventListener("click", () => {
+  isMuted = !isMuted;
+  
+  if (isMuted) {
+    muteBtn.textContent = "🔇 UNMUTE MUSIC";
+    muteBtn.classList.add("muted");
+  } else {
+    muteBtn.textContent = "🔊 MUTE MUSIC";
+    muteBtn.classList.remove("muted");
+  }
+  
+  sendMessage("toggleMute", { muted: isMuted });
 });
 
 // Init

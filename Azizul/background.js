@@ -11,11 +11,17 @@ let timerRunning = false;
 let remainingSeconds = workDuration;
 let timerInterval = null;
 
+let selectedMusic = "none";
+let backgroundAudio = null;
+let isMuted = false;
+
 // Load saved preferences on start
-browser.storage.local.get(["workDuration", "breakDuration", "cycles"]).then((result) => {
+// Update the initial storage load
+browser.storage.local.get(["workDuration", "breakDuration", "cycles", "selectedMusic"]).then((result) => {
   if (result.workDuration) workDuration = result.workDuration;
   if (result.breakDuration) breakDuration = result.breakDuration;
   if (result.cycles) cycles = result.cycles;
+  if (result.selectedMusic) selectedMusic = result.selectedMusic;
   remainingSeconds = isWorking ? workDuration : breakDuration;
 });
 
@@ -43,6 +49,7 @@ function startTimer() {
   }
   
   timerRunning = true;
+  playBackgroundMusic(); // Add this line
   sendStatus();
 
   timerInterval = setInterval(() => {
@@ -91,6 +98,7 @@ function pauseTimer() {
     clearInterval(timerInterval);
     timerInterval = null;
     timerRunning = false;
+    stopBackgroundMusic(); // Add this line
     sendStatus();
   }
 }
@@ -194,6 +202,39 @@ function skipSession() {
   }
 }
 
+function playBackgroundMusic() {
+  if (selectedMusic === "none" || isMuted) {
+    stopBackgroundMusic();
+    return;
+  }
+
+  // Always create a new Audio so the src matches selectedMusic
+  stopBackgroundMusic();
+  backgroundAudio = new Audio(browser.runtime.getURL(`music/${selectedMusic}.mp3`));
+  backgroundAudio.loop = true;
+  backgroundAudio.volume = 0.3;
+  backgroundAudio.play().catch(err => console.error("play failed:", err));
+}
+
+function stopBackgroundMusic() {
+  if (backgroundAudio) {
+    backgroundAudio.pause();
+    backgroundAudio.currentTime = 0;
+    try { backgroundAudio.src = ''; } catch(e) {}
+    backgroundAudio = null;
+  }
+}
+
+
+function toggleMute(muted) {
+  isMuted = muted;
+  if (isMuted) {
+    stopBackgroundMusic();
+  } else if (timerRunning && selectedMusic !== "none") {
+    playBackgroundMusic();
+  }
+}
+
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.action) {
     case "start":
@@ -214,8 +255,17 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "getStatus":
       sendStatus();
       break;
+    case "musicChanged":
+      selectedMusic = message.music;
+      if (timerRunning) {
+        stopBackgroundMusic();
+        playBackgroundMusic();
+      }
+      break;
+    case "toggleMute":
+      toggleMute(message.muted);
+      break;
     case "getBlockStatus":
-      // Content scripts ask whether to block now
       sendResponse({ 
         shouldBlock: timerRunning && isWorking, 
         remainingSeconds,
@@ -223,7 +273,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       return true;
     case "getBreakStatus":
-      // Content scripts ask whether it's break time
       sendResponse({ 
         isBreak: !isWorking, 
         timerRunning: timerRunning,
@@ -231,7 +280,6 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       return true;
     case "blockedSitesUpdated":
-      // Notify content scripts to re-check immediately
       browser.runtime.sendMessage({ action: "blockStatusChanged" }).catch(() => {});
       break;
   }
