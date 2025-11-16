@@ -112,7 +112,7 @@ if (typeof browser === "undefined") {
           color: #4CAF50;
         }
       </style>
-      <div id="pong-title">BREAK TIME - TAKE A REST</div>
+      <div id="pong-title">BREAK TIME - TAKE A REST OR PLAY PONG</div>
       <div id="pong-score">0 : 0</div>
       <canvas id="pong-canvas" width="800" height="600"></canvas>
       <div id="pong-instructions">◄ W/S KEYS TO MOVE ►</div>
