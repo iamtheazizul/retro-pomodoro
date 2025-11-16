@@ -135,9 +135,42 @@ function playSound() {
   audio.play().catch(() => {});
 }
 
+// function skipSession() {
+//   if (!isWorking) {
+//     // Can only skip during break time
+//     pauseTimer();
+    
+//     // Check if we've completed all cycles
+//     if (currentCycle >= cycles) {
+//       // All cycles complete
+//       notify("All cycles complete!", "Great job! Timer has stopped.");
+//       currentCycle = 0;
+//       isWorking = true;
+//       remainingSeconds = workDuration;
+//       sendStatus();
+//       return;
+//     }
+    
+//     // Move to next cycle
+//     currentCycle++;
+//     isWorking = true;
+//     remainingSeconds = workDuration;
+//     sendStatus();
+//     startTimer();
+//   }
+// }
+
 function skipSession() {
-  if (!isWorking) {
-    // Can only skip during break time
+  if (isWorking) {
+    // Skip work session - go to break
+    pauseTimer();
+    isWorking = false;
+    remainingSeconds = breakDuration;
+    notify("Work session skipped", "Starting break time.");
+    sendStatus();
+    startTimer();
+  } else {
+    // Skip break session - go to next cycle or finish
     pauseTimer();
     
     // Check if we've completed all cycles
@@ -155,6 +188,7 @@ function skipSession() {
     currentCycle++;
     isWorking = true;
     remainingSeconds = workDuration;
+    notify("Break skipped", "Starting next work session.");
     sendStatus();
     startTimer();
   }

@@ -142,12 +142,18 @@ function updateDisplay({ remainingSeconds, isWorking, timerRunning: running, cur
   cycleInfo.textContent = `Cycle ${currentCycle}/${totalCycles}`;
 
   // Show/hide skip button (only during break time)
-  if (running && !isWorking) {
+  // if (running && !isWorking) {
+  //   skipBtn.classList.remove("hidden");
+  // } else {
+  //   skipBtn.classList.add("hidden");
+  // }
+
+    // Show/hide skip button (during both work and break time)
+  if (running) {
     skipBtn.classList.remove("hidden");
   } else {
     skipBtn.classList.add("hidden");
   }
-
   // Update mode indicator
   if (!running) {
     modeIndicator.textContent = "READY";
