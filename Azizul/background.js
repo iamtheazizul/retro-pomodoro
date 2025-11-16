@@ -128,6 +128,14 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // Content scripts ask whether to block now
       sendResponse({ shouldBlock: timerRunning && isWorking, remainingSeconds });
       return true;
+    case "getBreakStatus":
+      // Content scripts ask whether it's break time
+      sendResponse({ 
+        isBreak: !isWorking, 
+        timerRunning: timerRunning,
+        remainingSeconds: remainingSeconds 
+      });
+      return true;
     case "blockedSitesUpdated":
       // Notify content scripts to re-check immediately
       browser.runtime.sendMessage({ action: "blockStatusChanged" }).catch(() => {});

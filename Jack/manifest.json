@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Universal Page Blocker Overlay",
+  "version": "1.0",
+  "description": "Blocks all pages using a fullscreen overlay",
+  "permissions": [
+    "tabs"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "icons": {
+    "48": "icon.png"
+  }
+}

@@ -65,11 +65,11 @@ function updateDisplay({ remainingSeconds, isWorking, timerRunning: running }) {
 
   if (!running) {
     upcomingLabel.textContent = "Ready to start!";
-    upcomingLabel.style.color = "#00ff00";
+    upcomingLabel.style.color = "#007000ff";
   } else if (isWorking) {
     let breakMins = Math.floor(storedBreakDuration / 60);
     upcomingLabel.textContent = `Next: Break (${breakMins}min)`;
-    upcomingLabel.style.color = "#00ffff";
+    upcomingLabel.style.color = "#02dcdcff";
   } else {
     let workMins = Math.floor(storedWorkDuration / 60);
     upcomingLabel.textContent = `Next: Work (${workMins}min)`;
@@ -124,7 +124,6 @@ startBtn.addEventListener("click", () => sendMessage("start"));
 pauseBtn.addEventListener("click", () => sendMessage("pause"));
 resetBtn.addEventListener("click", () => sendMessage("reset"));
 skipBtn.addEventListener("click", () => sendMessage("skip"));
-
 saveBtn.addEventListener("click", () => {
   const work = Number(workInput.value);
   const brk = Number(breakInput.value);
