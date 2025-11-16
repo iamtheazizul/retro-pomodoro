@@ -20,6 +20,7 @@ const skipBtn = document.getElementById("skip");
 const saveBtn = document.getElementById("save");
 const timerLabel = document.getElementById("timer");
 const upcomingLabel = document.getElementById("upcoming");
+const modeIndicator = document.getElementById("modeIndicator");
 
 const blockedSitesInput = document.getElementById("blockedSitesInput");
 const saveBlockedSitesBtn = document.getElementById("saveBlockedSitesBtn");
@@ -63,14 +64,21 @@ function updateDisplay({ remainingSeconds, isWorking, timerRunning: running }) {
   breakInput.disabled = running;
   saveBtn.disabled = running;
 
+  // Update mode indicator
   if (!running) {
+    modeIndicator.textContent = "READY";
+    modeIndicator.className = "mode-indicator mode-ready";
     upcomingLabel.textContent = "Ready to start!";
     upcomingLabel.style.color = "#007000ff";
   } else if (isWorking) {
+    modeIndicator.textContent = "WORK";
+    modeIndicator.className = "mode-indicator mode-work";
     let breakMins = Math.floor(storedBreakDuration / 60);
     upcomingLabel.textContent = `Next: Break (${breakMins}min)`;
     upcomingLabel.style.color = "#02dcdcff";
   } else {
+    modeIndicator.textContent = "BREAK";
+    modeIndicator.className = "mode-indicator mode-break";
     let workMins = Math.floor(storedWorkDuration / 60);
     upcomingLabel.textContent = `Next: Work (${workMins}min)`;
     upcomingLabel.style.color = "#ff00ff";

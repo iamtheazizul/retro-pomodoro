@@ -126,7 +126,11 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     case "getBlockStatus":
       // Content scripts ask whether to block now
-      sendResponse({ shouldBlock: timerRunning && isWorking, remainingSeconds });
+      sendResponse({ 
+        shouldBlock: timerRunning && isWorking, 
+        remainingSeconds,
+        timerRunning: timerRunning
+      });
       return true;
     case "getBreakStatus":
       // Content scripts ask whether it's break time

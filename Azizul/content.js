@@ -38,21 +38,32 @@ function stopOverlayTimer() {
 function checkAndBlock() {
   const currentHost = window.location.hostname.replace(/^www\./, "").toLowerCase();
 
-  browser.storage.local.get(["blockedSites"]).then(result => {
-    const blockedSites = (result.blockedSites || []).map(s => s.toLowerCase());
-    const isBlocked = blockedSites.some(site => site && (currentHost.includes(site) || site.includes(currentHost)));
-
-    if (isBlocked) {
-      browser.runtime.sendMessage({ action: "getBlockStatus" }, (response) => {
-        if (response && response.shouldBlock) {
-          showOverlay(response.remainingSeconds);
-        } else {
-          hideOverlay();
-        }
-      });
-    } else {
+  // First check if it's break time - if so, let content_script.js handle it
+  browser.runtime.sendMessage({ action: "getBreakStatus" }, (breakResponse) => {
+    if (breakResponse && breakResponse.isBreak && breakResponse.timerRunning) {
+      // It's break time - content_script.js will handle blocking ALL sites
       hideOverlay();
+      return;
     }
+
+    // Not break time - check if current site should be blocked during work time
+    browser.storage.local.get(["blockedSites"]).then(result => {
+      const blockedSites = (result.blockedSites || []).map(s => s.toLowerCase());
+      const isBlocked = blockedSites.some(site => site && (currentHost.includes(site) || site.includes(currentHost)));
+
+      if (isBlocked) {
+        // Check if timer is running AND it's work time
+        browser.runtime.sendMessage({ action: "getBlockStatus" }, (response) => {
+          if (response && response.shouldBlock && response.timerRunning) {
+            showOverlay(response.remainingSeconds);
+          } else {
+            hideOverlay();
+          }
+        });
+      } else {
+        hideOverlay();
+      }
+    });
   });
 }
 
